@@ -7,7 +7,7 @@ import Image from 'next/image';
 import AppButton from '@/components/AppButton';
 import AppInputForm from '@/components/AppInputForm';
 import AppAlert from '@/components/AppAlert';
-import logoRakamin from '@/assets/images/logo-rakamin.svg';
+import logoRa from '@/assets/images/logo-r.svg';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {
@@ -54,13 +54,7 @@ export default function Login() {
       className="flex flex-col gap-4 w-[500px]"
       noValidate
     >
-      <Image
-        src={logoRakamin}
-        alt="Logo Rakamin"
-        width={150}
-        height={50}
-        priority
-      />
+      <Image src={logoRa} alt="Logo Rakamin" width={150} height={50} priority />
 
       <Card
         sx={{

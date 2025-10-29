@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HireFlow - Hiring Management Application
+
+A modern recruitment platform built with Next.js to streamline the hiring process. Manage candidates, track applications, and make better hiring decisions.
+
+## Tech Stack
+
+- **Framework:** Next.js 16.0
+- **Language:** TypeScript
+- **UI Library:** Material-UI (MUI) v7
+- **State Management:** Zustand
+- **Authentication:** NextAuth.js
+- **Styling:** Emotion, Tailwind CSS
+- **Data Grid:** MUI X Data Grid
+- **Date Handling:** Day.js
 
 ## Getting Started
 
-First, run the development server:
+### Development
+
+Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Run the development server:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+bun run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-## Learn More
+### Production Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Docker Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Using Docker Compose (Recommended)
 
-## Deploy on Vercel
+```bash
+# Build and start the container
+docker-compose up --build
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Run in detached mode
+docker-compose up -d
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Stop the container
+docker-compose down
+```
+
+### Using Docker CLI
+
+```bash
+# Build the image
+docker build -t hiring-app .
+
+# Run the container
+docker run -p 3000:3000 hiring-app
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000)
+
+## Project Structure
+
+```
+hiring-app/
+├── app/              # Next.js app directory
+├── components/       # Reusable components
+├── assets/          # Images and static files
+├── public/          # Public static files
+└── ...
+```
+
+## Features
+
+- Candidate Management
+- Application Tracking
+- Analytics & Insights
+- User Authentication
+- Responsive Design
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory for environment-specific configuration:
+
+```env
+NEXTAUTH_SECRET=your-secret-key
+NEXTAUTH_URL=http://localhost:3000
+```
+
+## License
+
+Private

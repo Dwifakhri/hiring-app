@@ -12,6 +12,7 @@ type AppButtonProps = {
   variant?: 'text' | 'outlined' | 'contained';
   disabled?: boolean;
   loading?: boolean;
+  size?: 'small' | 'medium' | 'large';
 };
 
 const AppButton: React.FC<AppButtonProps> = ({
@@ -23,6 +24,7 @@ const AppButton: React.FC<AppButtonProps> = ({
   variant = 'contained',
   disabled = false,
   loading = false,
+  size = 'medium',
 }) => {
   const theme = useTheme();
 
@@ -30,6 +32,7 @@ const AppButton: React.FC<AppButtonProps> = ({
 
   return (
     <Button
+      size={size}
       type={type}
       color={color}
       fullWidth={fullWidth}
