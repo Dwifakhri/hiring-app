@@ -70,6 +70,7 @@ export default function AppAutocomplete<T>({
                 borderRadius: '8px',
                 '& fieldset': {
                   borderWidth: '2px',
+                  borderColor: theme.palette.divider,
                 },
                 '&:hover fieldset': {
                   borderColor: theme.palette.primary.main,

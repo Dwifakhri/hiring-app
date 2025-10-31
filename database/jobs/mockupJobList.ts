@@ -68,7 +68,7 @@ export const mockupJobsList: Jobs[] = [
       gender: 'optional',
       domicile: 'optional',
       phone: 'optional',
-      linkedin: 'off',
+      linkedin: 'mandatory',
       birth: 'optional',
     },
     applicants: [

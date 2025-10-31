@@ -76,6 +76,20 @@ export default function AppDatePicker({
               name,
               placeholder,
               sx: {
+                '& .MuiPickersOutlinedInput-root': {
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  '& fieldset': {
+                    borderColor: 'divider',
+                    borderWidth: '2px',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                },
                 '& .MuiInputBase-input::placeholder': {
                   fontSize: '14px',
                   color: theme.palette.text.secondary,

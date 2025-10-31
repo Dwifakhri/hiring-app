@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import AppRadioGroup from '@/components/AppRadio';
 import AppAutocomplete from '@/components/AppAutoComplete';
 import provinces from '@/database/provinces.json';
-import AppPhoneInput from '@/components/AppInputSelect';
+import AppInputSelect from '@/components/AppInputSelect';
 import { useJobsStore } from '@/store/jobs';
 import { useParams, useRouter } from 'next/navigation';
 import { Jobs, Applicant } from '@/types/jobs';
@@ -93,49 +93,61 @@ export default function Application() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!job) return;
 
-    // Check if already applied by checking email in applicants array
-    const alreadyApplied = job.applicants.some(
-      (applicant) => applicant.email === form.email
-    );
+    setLoading(true);
+    try {
+      // Check if already applied by checking email in applicants array
+      const alreadyApplied = job.applicants.some(
+        (applicant) => applicant.email === form.email
+      );
 
-    if (alreadyApplied) {
-      setStatus({ status: 'error', message: 'You have already applied' });
-      return;
+      if (alreadyApplied) {
+        setStatus({ status: 'error', message: 'You have already applied' });
+        setLoading(false);
+        return;
+      }
+
+      // Generate unique ID for the new applicant
+      const newApplicantId =
+        job.applicants.length > 0
+          ? Math.max(...job.applicants.map((a) => a.id)) + 1
+          : 1;
+
+      // Create new applicant object
+      const newApplicant: Applicant = {
+        id: newApplicantId,
+        full_name: form.full_name.trim(),
+        email: form.email.trim(),
+        phone: phone.trim(),
+        country_code: countryCode,
+        domicile: province?.name || form.domicile.trim(),
+        gender: form.gender,
+        linkedin: form.linkedin?.trim() || '',
+        birth: date ? date.format('YYYY-MM-DD') : form.birth || '',
+      };
+
+      // Update job in store
+      const updatedApplicants = [...job.applicants, newApplicant];
+      updateJob(jobId, { applicants: updatedApplicants });
+
+      // Success feedback + redirect
+      setTimeout(() => {
+        setStatus({
+          status: 'success',
+          message: '🎉 Your application was sent!',
+        });
+        setLoading(false);
+        router.push('/jobs');
+      }, 1000);
+    } catch (error) {
+      console.error(error);
+      setStatus({
+        status: 'error',
+        message: 'Something went wrong. Please try again.',
+      });
+      setLoading(false);
     }
-
-    // Generate unique ID for the new applicant
-    const newApplicantId =
-      job.applicants.length > 0
-        ? Math.max(...job.applicants.map((a) => a.id)) + 1
-        : 1;
-
-    // Create new applicant object
-    const newApplicant: Applicant = {
-      id: newApplicantId,
-      full_name: form.full_name,
-      email: form.email,
-      phone: phone,
-      country_code: countryCode,
-      domicile: province?.name || form.domicile,
-      gender: form.gender,
-      linkedin: form.linkedin,
-      birth: date ? date.format('YYYY-MM-DD') : form.birth,
-    };
-
-    // Add applicant to job's applicants array
-    const updatedApplicants = [...job.applicants, newApplicant];
-
-    // Update job in store
-    updateJob(jobId, { applicants: updatedApplicants });
-
-    // Show success message and redirect
-    setStatus({ status: 'success', message: '🎉 Your application was sent!' });
-    setTimeout(() => {
-      router.push('/jobs');
-    }, 1000);
   };
 
   if (loading || !job) {
@@ -276,7 +288,7 @@ export default function Application() {
               <AppAutocomplete
                 label="Province"
                 name="province"
-                placeholder="Select a province"
+                placeholder="Choose your domicile"
                 options={provinces}
                 value={province}
                 onChange={setProvince}
@@ -289,7 +301,7 @@ export default function Application() {
 
             {/* Conditionally render Phone Number */}
             {job.profile_configuration.phone !== 'off' && (
-              <AppPhoneInput
+              <AppInputSelect
                 label="Phone Number"
                 value={phone}
                 onChange={setPhone}
@@ -297,6 +309,7 @@ export default function Application() {
                 onCountryCodeChange={setCountryCode}
                 options={countries}
                 {...(job.profile_configuration.phone === 'mandatory' && {
+                  required: true,
                   starRequired: true,
                 })}
               />
@@ -345,6 +358,8 @@ export default function Application() {
         >
           <AppButton
             label="Submit"
+            loading={loading}
+            disabled={loading}
             // disabled={disabledSubmit}
             type="submit"
           />

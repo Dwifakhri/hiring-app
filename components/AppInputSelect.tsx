@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Box,
   TextField,
   MenuItem,
   FormControl,
@@ -15,7 +14,7 @@ interface CountryCode {
   phone: string;
 }
 
-interface AppPhoneInputProps {
+interface AppInputSelectProps {
   label?: string;
   name?: string;
   value: string;
@@ -27,7 +26,7 @@ interface AppPhoneInputProps {
   starRequired?: boolean;
 }
 
-export default function AppPhoneInput({
+export default function AppInputSelect({
   label,
   name,
   value,
@@ -37,7 +36,7 @@ export default function AppPhoneInput({
   options,
   required = false,
   starRequired = false,
-}: AppPhoneInputProps) {
+}: AppInputSelectProps) {
   const theme = useTheme();
 
   return (
@@ -55,15 +54,22 @@ export default function AppPhoneInput({
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Enter your phone number"
+        placeholder="81XXXXXXX"
         sx={{
           '& .MuiInputBase-root': {
             height: 40,
             borderRadius: 1,
+            fontSize: 14,
           },
           '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
             borderColor: theme.palette.primary.main,
             borderWidth: 2,
+          },
+          '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'divider',
+            borderWidth: 2,
+            borderRadius: '8px',
+            fontSize: 12,
           },
         }}
         InputProps={{

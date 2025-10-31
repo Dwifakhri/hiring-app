@@ -21,6 +21,7 @@ import { Jobs } from '@/types/jobs';
 import { useJobsStore } from '@/store/jobs';
 import Image from 'next/image';
 import noJobs from '@/assets/images/no-jobs.svg';
+import { formatCurrency } from '@/utils/formatNumber';
 
 export default function ApplicantJobs() {
   const router = useRouter();
@@ -49,10 +50,6 @@ export default function ApplicantJobs() {
       }, 500);
     }
   }, [selectedJob?.id, getJobById]);
-
-  const formatSalary = (min: number, max: number) => {
-    return `$${(min / 1000).toFixed(0)}k - $${(max / 1000).toFixed(0)}k`;
-  };
 
   const handleApplyJob = (jobId: number) => {
     // Navigate to application page
@@ -186,10 +183,8 @@ export default function ApplicantJobs() {
                         >
                           <Briefcase size={12} />
                           <Typography variant="body2" color="info.100">
-                            {formatSalary(
-                              job.salary_range.min,
-                              job.salary_range.max
-                            )}
+                            {formatCurrency(job.salary_range.min)} -{' '}
+                            {formatCurrency(job.salary_range.max)}
                           </Typography>
                         </Box>
                       </Box>
@@ -241,6 +236,7 @@ export default function ApplicantJobs() {
                               sx={{
                                 borderRadius: '4px',
                                 p: '2px 8px',
+                                textTransform: 'capitalize',
                               }}
                               label={selectedJob.job_type}
                               color="success"
@@ -271,77 +267,6 @@ export default function ApplicantJobs() {
 
                     <Divider sx={{ mb: 3 }} />
 
-                    {/* Job Details Section */}
-                    <Box sx={{ mb: 3 }}>
-                      <Typography
-                        variant="h6"
-                        fontWeight="bold"
-                        gutterBottom
-                        sx={{ mb: 2 }}
-                      >
-                        Job Details
-                      </Typography>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 1.5,
-                        }}
-                      >
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          <MapPin size={16} />
-                          <Typography variant="body2">
-                            <strong>Location:</strong> {selectedJob.location}
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          <Briefcase size={16} />
-                          <Typography variant="body2">
-                            <strong>Salary:</strong>{' '}
-                            {formatSalary(
-                              selectedJob.salary_range.min,
-                              selectedJob.salary_range.max
-                            )}
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: 1,
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Type:</strong>
-                          </Typography>
-                          <Chip
-                            label={selectedJob.job_type}
-                            size="small"
-                            color="success"
-                            sx={{ height: 20 }}
-                          />
-                        </Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: 1,
-                          }}
-                        >
-                          <Typography variant="body2">
-                            <strong>Department:</strong>{' '}
-                            {selectedJob.department}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-
-                    <Divider sx={{ mb: 3 }} />
-
                     {/* Job Description Section */}
                     <Box sx={{ mb: 3 }}>
                       <Typography
@@ -360,8 +285,6 @@ export default function ApplicantJobs() {
                         {selectedJob.job_description}
                       </Typography>
                     </Box>
-
-                    <Divider sx={{ mb: 3 }} />
                   </>
                 ) : (
                   <Box

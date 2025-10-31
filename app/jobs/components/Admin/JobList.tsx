@@ -1,5 +1,6 @@
 'use client';
 
+import { formatCurrency } from '@/utils/formatNumber';
 import AppButton from '@/components/AppButton';
 import { Box, Card, Chip, Typography } from '@mui/material';
 import type { Jobs } from '@/types/jobs';
@@ -11,14 +12,6 @@ interface JobListProps {
 
 export default function JobList({ jobs }: JobListProps) {
   const router = useRouter();
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
