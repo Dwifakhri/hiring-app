@@ -17,12 +17,19 @@ import { useParams, useRouter } from 'next/navigation';
 import { Jobs, Applicant } from '@/types/jobs';
 import { useStatusStore } from '@/store/status';
 import AppLoading from '@/components/AppLoading';
+import dynamic from 'next/dynamic';
+
+const ModalProfileCam = dynamic(
+  () => import('@/app/jobs/components/applicant/ModalProfileCam'),
+  { ssr: false }
+);
 
 export default function Application() {
   const params = useParams();
   const router = useRouter();
   const { setStatus } = useStatusStore();
   const jobId = Number(params.id);
+  const [openModalProfile, setOpenModalProfile] = useState(false);
   const { getJobById, jobs, updateJob } = useJobsStore();
   const [job, setJob] = useState<Jobs | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,6 +98,10 @@ export default function Application() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePhotoProfile = (photo: string) => {
+    setForm((prev) => ({ ...prev, photo_profile: photo }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!job) return;
@@ -155,217 +166,229 @@ export default function Application() {
   }
 
   return (
-    <Box sx={{ backgroundColor: '#fff' }} width={700} mx="auto">
-      <form onSubmit={handleSubmit}>
-        <Box
-          p="40px"
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-            borderWidth: '1px',
-            borderColor: 'divider',
-          }}
-        >
+    <>
+      <Box sx={{ backgroundColor: '#fff' }} width={700} mx="auto">
+        <form onSubmit={handleSubmit}>
           <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box display="flex" alignItems="center" gap={1}>
-              <IconButton color="info" onClick={() => router.back()}>
-                <ArrowLeft />
-              </IconButton>
-              <Typography variant="h6" fontWeight={700}>
-                Apply {job.job_name} at {job.company}
-              </Typography>
-            </Box>
-            <Typography variant="subtitle2">
-              ℹ️ This field required to fill
-            </Typography>
-          </Box>
-          <Box
+            p="40px"
             sx={{
-              px: '24px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '16px',
-              flex: 1,
+              gap: '24px',
+              borderWidth: '1px',
+              borderColor: 'divider',
             }}
           >
-            <span className="text-red-500 font-bold">* Required</span>
-
-            {/* Conditionally render Photo Profile */}
-            {job.profile_configuration.photo_profile !== 'off' && (
-              <Box display="flex" gap={2} flexDirection="column">
-                <Typography variant="subtitle1" fontWeight={700}>
-                  Photo Profile{' '}
-                  {job.profile_configuration.photo_profile === 'mandatory' && (
-                    <span className="text-red-500">*</span>
-                  )}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <IconButton color="info" onClick={() => router.back()}>
+                  <ArrowLeft />
+                </IconButton>
+                <Typography variant="h6" fontWeight={700}>
+                  Apply {job.job_name} at {job.company}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Upload a professional photo for your application
-                </Typography>
-                <Avatar
-                  src={AvatarProfile.src}
-                  sx={{ width: 128, height: 128 }}
-                />
-                <Button
-                  variant="outlined"
-                  color="info"
-                  sx={{
-                    width: 'fit-content',
-                    borderRadius: '8px',
-                    boxShadow: '0px 1px 2px 0px #0000001F',
-                    borderColor: 'divider',
-                    textTransform: 'none',
-                    p: '4px 16px',
-                    fontWeight: 700,
-                  }}
-                >
-                  <Upload
-                    size={14}
-                    fontWeight={700}
-                    style={{ marginRight: 4 }}
-                  />{' '}
-                  Take a Picture
-                </Button>
               </Box>
-            )}
+              <Typography variant="subtitle2">
+                ℹ️ This field required to fill
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                px: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+                flex: 1,
+              }}
+            >
+              <span className="text-red-500 font-bold">* Required</span>
 
-            {/* Conditionally render Full Name */}
-            {job.profile_configuration.full_name !== 'off' && (
-              <AppInputForm
-                name="full_name"
-                label="Full name"
-                value={form.full_name}
-                onChange={handleChange}
-                {...(job.profile_configuration.full_name === 'mandatory' && {
-                  required: true,
-                  starRequired: true,
-                })}
-                placeholder="Enter your full name"
-                helperText="Please provide your full legal name"
-              />
-            )}
+              {/* Conditionally render Photo Profile */}
+              {job.profile_configuration.photo_profile !== 'off' && (
+                <Box display="flex" gap={1} flexDirection="column">
+                  <Typography variant="subtitle1" fontWeight={700}>
+                    Photo Profile{' '}
+                    {job.profile_configuration.photo_profile ===
+                      'mandatory' && <span className="text-red-500">*</span>}
+                  </Typography>
+                  {form.photo_profile ? (
+                    <Avatar
+                      variant="square"
+                      src={form.photo_profile}
+                      sx={{ width: 128, height: 128 }}
+                    />
+                  ) : (
+                    <Avatar
+                      src={AvatarProfile.src}
+                      sx={{ width: 128, height: 128 }}
+                    />
+                  )}
+                  <Button
+                    onClick={() => setOpenModalProfile(true)}
+                    variant="outlined"
+                    color="info"
+                    sx={{
+                      width: 'fit-content',
+                      borderRadius: '8px',
+                      boxShadow: '0px 1px 2px 0px #0000001F',
+                      borderColor: 'divider',
+                      textTransform: 'none',
+                      p: '4px 16px',
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Upload
+                      size={14}
+                      fontWeight={700}
+                      style={{ marginRight: 4 }}
+                    />{' '}
+                    Take a Picture
+                  </Button>
+                </Box>
+              )}
 
-            {/* Conditionally render Date of Birth */}
-            {job.profile_configuration.birth !== 'off' && (
-              <AppDatePicker
-                label="Date of Birth"
-                name="birth"
-                value={date}
-                onChange={(newDate) => setDate(newDate)}
-                {...(job.profile_configuration.birth === 'mandatory' && {
-                  starRequired: true,
-                })}
-                disableFuture
-                placeholder="30 January 2001"
-              />
-            )}
+              {/* Conditionally render Full Name */}
+              {job.profile_configuration.full_name !== 'off' && (
+                <AppInputForm
+                  name="full_name"
+                  label="Full name"
+                  value={form.full_name}
+                  onChange={handleChange}
+                  {...(job.profile_configuration.full_name === 'mandatory' && {
+                    required: true,
+                    starRequired: true,
+                  })}
+                  placeholder="Enter your full name"
+                  helperText="Please provide your full legal name"
+                />
+              )}
 
-            {/* Conditionally render Gender */}
-            {job.profile_configuration.gender !== 'off' && (
-              <AppRadioGroup
-                label="Pronoun (gender)"
-                name="gender"
-                value={form.gender}
-                onChange={handleChange}
-                row
-                {...(job.profile_configuration.gender === 'mandatory' && {
-                  starRequired: true,
-                })}
-                options={[
-                  { label: 'She/her (Female)', value: 'female' },
-                  { label: 'He/him (Male)', value: 'male' },
-                ]}
-              />
-            )}
+              {/* Conditionally render Date of Birth */}
+              {job.profile_configuration.birth !== 'off' && (
+                <AppDatePicker
+                  label="Date of Birth"
+                  name="birth"
+                  value={date}
+                  onChange={(newDate) => setDate(newDate)}
+                  {...(job.profile_configuration.birth === 'mandatory' && {
+                    starRequired: true,
+                  })}
+                  disableFuture
+                  placeholder="30 January 2001"
+                />
+              )}
 
-            {/* Conditionally render Domicile/Province */}
-            {job.profile_configuration.domicile !== 'off' && (
-              <AppAutocomplete
-                label="Province"
-                name="province"
-                placeholder="Choose your domicile"
-                options={provinces}
-                value={province}
-                onChange={setProvince}
-                getOptionLabel={(option) => option.name}
-                {...(job.profile_configuration.domicile === 'mandatory' && {
-                  starRequired: true,
-                })}
-              />
-            )}
+              {/* Conditionally render Gender */}
+              {job.profile_configuration.gender !== 'off' && (
+                <AppRadioGroup
+                  label="Pronoun (gender)"
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  row
+                  {...(job.profile_configuration.gender === 'mandatory' && {
+                    starRequired: true,
+                  })}
+                  options={[
+                    { label: 'She/her (Female)', value: 'female' },
+                    { label: 'He/him (Male)', value: 'male' },
+                  ]}
+                />
+              )}
 
-            {/* Conditionally render Phone Number */}
-            {job.profile_configuration.phone !== 'off' && (
-              <AppInputSelect
-                label="Phone Number"
-                value={phone}
-                onChange={setPhone}
-                countryCode={countryCode}
-                onCountryCodeChange={setCountryCode}
-                options={countries}
-                {...(job.profile_configuration.phone === 'mandatory' && {
-                  required: true,
-                  starRequired: true,
-                })}
-              />
-            )}
+              {/* Conditionally render Domicile/Province */}
+              {job.profile_configuration.domicile !== 'off' && (
+                <AppAutocomplete
+                  label="Province"
+                  name="province"
+                  placeholder="Choose your domicile"
+                  options={provinces}
+                  value={province}
+                  onChange={setProvince}
+                  getOptionLabel={(option) => option.name}
+                  {...(job.profile_configuration.domicile === 'mandatory' && {
+                    starRequired: true,
+                  })}
+                />
+              )}
 
-            {/* Conditionally render Email */}
-            {job.profile_configuration.email !== 'off' && (
-              <AppInputForm
-                name="email"
-                label="Email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                {...(job.profile_configuration.email === 'mandatory' && {
-                  required: true,
-                  starRequired: true,
-                })}
-                placeholder="Enter your email address"
-                helperText="We'll use this email to contact you"
-              />
-            )}
+              {/* Conditionally render Phone Number */}
+              {job.profile_configuration.phone !== 'off' && (
+                <AppInputSelect
+                  label="Phone Number"
+                  value={phone}
+                  onChange={setPhone}
+                  countryCode={countryCode}
+                  onCountryCodeChange={setCountryCode}
+                  options={countries}
+                  {...(job.profile_configuration.phone === 'mandatory' && {
+                    required: true,
+                    starRequired: true,
+                  })}
+                />
+              )}
 
-            {/* Conditionally render LinkedIn */}
-            {job.profile_configuration.linkedin !== 'off' && (
-              <AppInputForm
-                name="linkedin"
-                label="Link Linkedin"
-                type="linkedin"
-                value={form.linkedin}
-                onChange={handleChange}
-                {...(job.profile_configuration.linkedin === 'mandatory' && {
-                  required: true,
-                  starRequired: true,
-                })}
-                placeholder="https://linkedin.com/in/username"
-                helperText="Provide your LinkedIn profile URL"
-              />
-            )}
+              {/* Conditionally render Email */}
+              {job.profile_configuration.email !== 'off' && (
+                <AppInputForm
+                  name="email"
+                  label="Email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  {...(job.profile_configuration.email === 'mandatory' && {
+                    required: true,
+                    starRequired: true,
+                  })}
+                  placeholder="Enter your email address"
+                  helperText="We'll use this email to contact you"
+                />
+              )}
+
+              {/* Conditionally render LinkedIn */}
+              {job.profile_configuration.linkedin !== 'off' && (
+                <AppInputForm
+                  name="linkedin"
+                  label="Link Linkedin"
+                  type="linkedin"
+                  value={form.linkedin}
+                  onChange={handleChange}
+                  {...(job.profile_configuration.linkedin === 'mandatory' && {
+                    required: true,
+                    starRequired: true,
+                  })}
+                  placeholder="https://linkedin.com/in/username"
+                  helperText="Provide your LinkedIn profile URL"
+                />
+              )}
+            </Box>
           </Box>
-        </Box>
 
-        <Box
-          sx={{
-            p: '24px 40px',
-          }}
-        >
-          <AppButton
-            label="Submit"
-            loading={loading}
-            disabled={loading}
-            // disabled={disabledSubmit}
-            type="submit"
-          />
-        </Box>
-        {/* </Box> */}
-      </form>
-    </Box>
+          <Box
+            sx={{
+              p: '24px 40px',
+            }}
+          >
+            <AppButton
+              label="Submit"
+              loading={loading}
+              disabled={loading}
+              // disabled={disabledSubmit}
+              type="submit"
+            />
+          </Box>
+          {/* </Box> */}
+        </form>
+      </Box>
+      <ModalProfileCam
+        open={openModalProfile}
+        onClose={() => setOpenModalProfile(false)}
+        onSubmitPhoto={handlePhotoProfile}
+      />
+    </>
   );
 }
