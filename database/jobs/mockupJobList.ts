@@ -17,11 +17,11 @@ export const mockupJobsList: Jobs[] = [
       full_name: 'mandatory',
       email: 'mandatory',
       photo_profile: 'mandatory',
-      gender: 'optional',
-      domicile: 'optional',
-      phone: 'optional',
-      linkedin: 'off',
-      birth: 'optional',
+      gender: 'mandatory',
+      domicile: 'mandatory',
+      phone: 'mandatory',
+      linkedin: 'mandatory',
+      birth: 'mandatory',
     },
     applicants: [
       {
@@ -34,6 +34,7 @@ export const mockupJobsList: Jobs[] = [
         gender: 'Female',
         linkedin: 'https://linkedin.com/in/ayuputri',
         birth: '1998-06-12',
+        photo_profile: 'https://randomuser.me/api/portraits/women/1.jpg',
       },
       {
         id: 2,
@@ -45,6 +46,7 @@ export const mockupJobsList: Jobs[] = [
         gender: 'Male',
         linkedin: 'https://linkedin.com/in/rizalpratama',
         birth: '1996-11-04',
+        photo_profile: 'https://randomuser.me/api/portraits/women/1.jpg',
       },
     ],
   },
@@ -82,6 +84,7 @@ export const mockupJobsList: Jobs[] = [
         gender: 'Female',
         linkedin: 'https://linkedin.com/in/sintamaharani',
         birth: '1999-03-20',
+        photo_profile: 'https://randomuser.me/api/portraits/women/2.jpg',
       },
       {
         id: 2,
@@ -93,6 +96,7 @@ export const mockupJobsList: Jobs[] = [
         gender: 'Male',
         linkedin: 'https://linkedin.com/in/dwinugroho',
         birth: '1997-08-02',
+        photo_profile: 'https://randomuser.me/api/portraits/women/3.jpg',
       },
     ],
   },

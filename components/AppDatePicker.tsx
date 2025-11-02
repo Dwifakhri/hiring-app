@@ -1,10 +1,17 @@
-import { FormControl, FormLabel } from '@mui/material';
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Typography,
+} from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { Dayjs } from 'dayjs';
 import { useCallback } from 'react';
 import { useTheme } from '@mui/material/styles';
+import { AlertTriangle } from 'react-feather';
 
 interface AppDatePickerProps {
   label?: string;
@@ -18,6 +25,8 @@ interface AppDatePickerProps {
   disableFuture?: boolean;
   disablePast?: boolean;
   placeholder?: string;
+  error?: boolean;
+  helperText?: string;
 }
 
 export default function AppDatePicker({
@@ -32,6 +41,8 @@ export default function AppDatePicker({
   disableFuture,
   disablePast,
   placeholder = 'Select date',
+  error = false,
+  helperText,
 }: AppDatePickerProps) {
   const handleChange = useCallback(
     (newValue: Dayjs | null) => {
@@ -59,7 +70,6 @@ export default function AppDatePicker({
             {starRequired && <span style={{ color: 'red' }}>*</span>}
           </FormLabel>
         )}
-
         <DesktopDatePicker
           value={value}
           onChange={handleChange}
@@ -75,19 +85,24 @@ export default function AppDatePicker({
               size: 'small',
               name,
               placeholder,
+              error,
               sx: {
                 '& .MuiPickersOutlinedInput-root': {
                   borderRadius: '8px',
                   fontSize: '14px',
                   '& fieldset': {
-                    borderColor: 'divider',
+                    borderColor: error ? theme.palette.error.main : 'divider',
                     borderWidth: '2px',
                   },
                   '&:hover fieldset': {
-                    borderColor: theme.palette.primary.main,
+                    borderColor: error
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: theme.palette.primary.main,
+                    borderColor: error
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
                   },
                 },
                 '& .MuiInputBase-input::placeholder': {
@@ -99,18 +114,33 @@ export default function AppDatePicker({
                   borderRadius: 1,
                   '& fieldset': {
                     borderWidth: '2px',
+                    borderColor: error ? theme.palette.error.main : 'divider',
                   },
                   '&:hover fieldset': {
-                    borderColor: theme.palette.primary.main,
+                    borderColor: error
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: theme.palette.primary.main,
+                    borderColor: error
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
                   },
                 },
               },
             },
           }}
         />
+        {error && (
+          <FormHelperText id="filled-weight-helper-text" component="div">
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <AlertTriangle size={14} color={'#d32f2f'} />
+              <Typography variant="body2" color="error" component="span">
+                {helperText}
+              </Typography>
+            </Box>
+          </FormHelperText>
+        )}
       </FormControl>
     </LocalizationProvider>
   );

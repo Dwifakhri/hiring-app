@@ -1,11 +1,18 @@
 'use client';
 
-import { Avatar, Box, Button, IconButton, Typography } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  Button,
+  FormHelperText,
+  IconButton,
+  Typography,
+} from '@mui/material';
 import AppButton from '@/components/AppButton';
 import AppInputForm from '@/components/AppInputForm';
 import AvatarProfile from '@/assets/images/avatar-photo.png';
-import { ArrowLeft, Upload } from 'react-feather';
-import { useState, useEffect } from 'react';
+import { AlertTriangle, ArrowLeft, Upload } from 'react-feather';
+import { useState, useEffect, useMemo } from 'react';
 import AppDatePicker from '@/components/AppDatePicker';
 import dayjs from 'dayjs';
 import AppRadioGroup from '@/components/AppRadio';
@@ -18,11 +25,26 @@ import { Jobs, Applicant } from '@/types/jobs';
 import { useStatusStore } from '@/store/status';
 import AppLoading from '@/components/AppLoading';
 import dynamic from 'next/dynamic';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
 const ModalProfileCam = dynamic(
   () => import('@/app/jobs/components/applicant/ModalProfileCam'),
   { ssr: false }
 );
+
+interface ApplyJobFormInputs {
+  full_name: string;
+  photo_profile: string;
+  birth: string;
+  gender: string;
+  domicile: string;
+  phone: string;
+  email: string;
+  country_code: string;
+  linkedin: string;
+}
 
 export default function Application() {
   const params = useParams();
@@ -33,28 +55,111 @@ export default function Application() {
   const { getJobById, jobs, updateJob } = useJobsStore();
   const [job, setJob] = useState<Jobs | null>(null);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({
-    full_name: '',
-    photo_profile: '',
-    birth: '',
-    gender: '',
-    domicile: '',
-    phone: '',
-    email: '',
-    country_code: '',
-    linkedin: '',
-  });
-  const [date, setDate] = useState<dayjs.Dayjs | null>(null);
-  const [province, setProvince] = useState<{ id: string; name: string } | null>(
-    null
-  );
-  const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+62');
+  const [photoProfile, setPhotoProfile] = useState<string>('');
   const countries = [
     { code: '🇮🇩', label: 'Indonesia', phone: '+62' },
     { code: '🇲🇾', label: 'Malaysia', phone: '+60' },
     { code: '🇸🇬', label: 'Singapore', phone: '+65' },
   ];
+
+  // Create dynamic validation schema based on job configuration
+  const validationSchema = useMemo(() => {
+    if (!job) return yup.object().shape({});
+
+    const config = job.profile_configuration;
+    const schema: Record<string, yup.StringSchema> = {};
+
+    if (config.full_name !== 'off') {
+      schema.full_name =
+        config.full_name === 'mandatory'
+          ? yup.string().required('Full name is required')
+          : yup.string();
+    }
+
+    if (config.photo_profile !== 'off') {
+      schema.photo_profile =
+        config.photo_profile === 'mandatory'
+          ? yup.string().required('Photo profile is required')
+          : yup.string();
+    }
+
+    if (config.birth !== 'off') {
+      schema.birth =
+        config.birth === 'mandatory'
+          ? yup.string().required('Birth date is required')
+          : yup.string();
+    }
+
+    if (config.gender !== 'off') {
+      schema.gender =
+        config.gender === 'mandatory'
+          ? yup.string().required('Gender is required')
+          : yup.string();
+    }
+
+    if (config.domicile !== 'off') {
+      schema.domicile =
+        config.domicile === 'mandatory'
+          ? yup.string().required('Domicile is required')
+          : yup.string();
+    }
+
+    if (config.phone !== 'off') {
+      schema.phone =
+        config.phone === 'mandatory'
+          ? yup.string().required('Phone number is required')
+          : yup.string();
+      schema.country_code =
+        config.phone === 'mandatory'
+          ? yup.string().required('Country code is required')
+          : yup.string();
+    }
+
+    if (config.email !== 'off') {
+      schema.email =
+        config.email === 'mandatory'
+          ? yup
+              .string()
+              .required('Email is required')
+              .email('Invalid email format')
+          : yup.string().email('Invalid email format');
+    }
+
+    if (config.linkedin !== 'off') {
+      schema.linkedin =
+        config.linkedin === 'mandatory'
+          ? yup
+              .string()
+              .required('LinkedIn is required')
+              .url('LinkedIn must be a valid URL')
+          : yup.string().url('LinkedIn must be a valid URL');
+    }
+
+    return yup.object().shape(schema);
+  }, [job]);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<ApplyJobFormInputs>({
+    // @ts-expect-error - yup resolver type inference issue with optional fields
+    resolver: yupResolver(validationSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      full_name: '',
+      photo_profile: '',
+      birth: '',
+      gender: '',
+      domicile: '',
+      phone: '',
+      email: '',
+      country_code: '+62',
+      linkedin: '',
+    },
+  });
 
   // Get job details from store
   useEffect(() => {
@@ -88,29 +193,19 @@ export default function Application() {
     };
   }, [jobId, getJobById, router, jobs]);
 
-  const handleChange = (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handlePhotoProfile = (photo: string) => {
-    setForm((prev) => ({ ...prev, photo_profile: photo }));
+    setPhotoProfile(photo);
+    setValue('photo_profile', photo, { shouldValidate: true });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit: SubmitHandler<ApplyJobFormInputs> = async (data) => {
     if (!job) return;
 
     setLoading(true);
     try {
       // Check if already applied by checking email in applicants array
       const alreadyApplied = job.applicants.some(
-        (applicant) => applicant.email === form.email
+        (applicant) => applicant.email === data.email
       );
 
       if (alreadyApplied) {
@@ -128,14 +223,15 @@ export default function Application() {
       // Create new applicant object
       const newApplicant: Applicant = {
         id: newApplicantId,
-        full_name: form.full_name.trim(),
-        email: form.email.trim(),
-        phone: phone.trim(),
-        country_code: countryCode,
-        domicile: province?.name || form.domicile.trim(),
-        gender: form.gender,
-        linkedin: form.linkedin?.trim() || '',
-        birth: date ? date.format('YYYY-MM-DD') : form.birth || '',
+        full_name: data.full_name.trim(),
+        email: data.email.trim(),
+        phone: data.phone.trim(),
+        country_code: data.country_code,
+        domicile: data.domicile.trim(),
+        gender: data.gender,
+        linkedin: data.linkedin.trim() || '',
+        birth: data.birth || '',
+        photo_profile: data.photo_profile || '',
       };
 
       // Update job in store
@@ -152,7 +248,6 @@ export default function Application() {
         router.push('/jobs');
       }, 1000);
     } catch (error) {
-      console.error(error);
       setStatus({
         status: 'error',
         message: 'Something went wrong. Please try again.',
@@ -168,7 +263,8 @@ export default function Application() {
   return (
     <>
       <Box sx={{ backgroundColor: '#fff' }} width={700} mx="auto">
-        <form onSubmit={handleSubmit}>
+        {/* @ts-expect-error - react-hook-form type inference issue with yup resolver */}
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <Box
             p="40px"
             sx={{
@@ -215,10 +311,10 @@ export default function Application() {
                     {job.profile_configuration.photo_profile ===
                       'mandatory' && <span className="text-red-500">*</span>}
                   </Typography>
-                  {form.photo_profile ? (
+                  {photoProfile ? (
                     <Avatar
-                      variant="square"
-                      src={form.photo_profile}
+                      variant="rounded"
+                      src={photoProfile}
                       sx={{ width: 128, height: 128 }}
                     />
                   ) : (
@@ -248,121 +344,185 @@ export default function Application() {
                     />{' '}
                     Take a Picture
                   </Button>
+                  {errors.photo_profile?.message && (
+                    <FormHelperText
+                      id="filled-weight-helper-text"
+                      component="div"
+                    >
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                      >
+                        <AlertTriangle size={14} color={'#d32f2f'} />
+                        <Typography
+                          variant="body2"
+                          color="error"
+                          component="span"
+                        >
+                          {errors.photo_profile?.message}
+                        </Typography>
+                      </Box>
+                    </FormHelperText>
+                  )}
                 </Box>
               )}
 
               {/* Conditionally render Full Name */}
               {job.profile_configuration.full_name !== 'off' && (
                 <AppInputForm
-                  name="full_name"
                   label="Full name"
-                  value={form.full_name}
-                  onChange={handleChange}
+                  placeholder="Enter your full name"
                   {...(job.profile_configuration.full_name === 'mandatory' && {
                     required: true,
                     starRequired: true,
                   })}
-                  placeholder="Enter your full name"
-                  helperText="Please provide your full legal name"
+                  error={!!errors.full_name}
+                  helperText={errors.full_name?.message}
+                  {...register('full_name')}
                 />
               )}
 
               {/* Conditionally render Date of Birth */}
               {job.profile_configuration.birth !== 'off' && (
-                <AppDatePicker
-                  label="Date of Birth"
+                <Controller
                   name="birth"
-                  value={date}
-                  onChange={(newDate) => setDate(newDate)}
-                  {...(job.profile_configuration.birth === 'mandatory' && {
-                    starRequired: true,
-                  })}
-                  disableFuture
-                  placeholder="30 January 2001"
+                  control={control}
+                  render={({ field }) => (
+                    <AppDatePicker
+                      label="Date of Birth"
+                      name="birth"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(newDate) =>
+                        field.onChange(
+                          newDate ? newDate.format('YYYY-MM-DD') : ''
+                        )
+                      }
+                      {...(job.profile_configuration.birth === 'mandatory' && {
+                        starRequired: true,
+                      })}
+                      disableFuture
+                      placeholder="30 January 2001"
+                      error={!!errors.birth}
+                      helperText={errors.birth?.message}
+                    />
+                  )}
                 />
               )}
 
               {/* Conditionally render Gender */}
               {job.profile_configuration.gender !== 'off' && (
-                <AppRadioGroup
-                  label="Pronoun (gender)"
+                <Controller
                   name="gender"
-                  value={form.gender}
-                  onChange={handleChange}
-                  row
-                  {...(job.profile_configuration.gender === 'mandatory' && {
-                    starRequired: true,
-                  })}
-                  options={[
-                    { label: 'She/her (Female)', value: 'female' },
-                    { label: 'He/him (Male)', value: 'male' },
-                  ]}
+                  control={control}
+                  render={({ field }) => (
+                    <AppRadioGroup
+                      label="Pronoun (gender)"
+                      name="gender"
+                      value={field.value}
+                      onChange={field.onChange}
+                      row
+                      {...(job.profile_configuration.gender === 'mandatory' && {
+                        starRequired: true,
+                      })}
+                      options={[
+                        { label: 'She/her (Female)', value: 'female' },
+                        { label: 'He/him (Male)', value: 'male' },
+                      ]}
+                      error={!!errors.gender}
+                      helperText={errors.gender?.message}
+                    />
+                  )}
                 />
               )}
 
               {/* Conditionally render Domicile/Province */}
               {job.profile_configuration.domicile !== 'off' && (
-                <AppAutocomplete
-                  label="Province"
-                  name="province"
-                  placeholder="Choose your domicile"
-                  options={provinces}
-                  value={province}
-                  onChange={setProvince}
-                  getOptionLabel={(option) => option.name}
-                  {...(job.profile_configuration.domicile === 'mandatory' && {
-                    starRequired: true,
-                  })}
+                <Controller
+                  name="domicile"
+                  control={control}
+                  render={({ field }) => (
+                    <AppAutocomplete
+                      label="Province"
+                      name="domicile"
+                      placeholder="Choose your domicile"
+                      options={provinces}
+                      value={
+                        provinces.find((p) => p.name === field.value) || null
+                      }
+                      onChange={(newValue) =>
+                        field.onChange(newValue?.name || '')
+                      }
+                      getOptionLabel={(option) => option.name}
+                      {...(job.profile_configuration.domicile ===
+                        'mandatory' && {
+                        starRequired: true,
+                      })}
+                      error={!!errors.domicile}
+                      helperText={errors.domicile?.message}
+                    />
+                  )}
                 />
               )}
 
               {/* Conditionally render Phone Number */}
               {job.profile_configuration.phone !== 'off' && (
-                <AppInputSelect
-                  label="Phone Number"
-                  value={phone}
-                  onChange={setPhone}
-                  countryCode={countryCode}
-                  onCountryCodeChange={setCountryCode}
-                  options={countries}
-                  {...(job.profile_configuration.phone === 'mandatory' && {
-                    required: true,
-                    starRequired: true,
-                  })}
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field: phoneField }) => (
+                    <Controller
+                      name="country_code"
+                      control={control}
+                      render={({ field: countryCodeField }) => (
+                        <AppInputSelect
+                          label="Phone Number"
+                          value={phoneField.value}
+                          onChange={phoneField.onChange}
+                          countryCode={countryCodeField.value}
+                          onCountryCodeChange={countryCodeField.onChange}
+                          options={countries}
+                          {...(job.profile_configuration.phone ===
+                            'mandatory' && {
+                            required: true,
+                            starRequired: true,
+                          })}
+                          error={!!errors.phone}
+                          helperText={errors.phone?.message}
+                        />
+                      )}
+                    />
+                  )}
                 />
               )}
 
               {/* Conditionally render Email */}
               {job.profile_configuration.email !== 'off' && (
                 <AppInputForm
-                  name="email"
                   label="Email"
                   type="email"
-                  value={form.email}
-                  onChange={handleChange}
+                  placeholder="Enter your email address"
                   {...(job.profile_configuration.email === 'mandatory' && {
                     required: true,
                     starRequired: true,
                   })}
-                  placeholder="Enter your email address"
-                  helperText="We'll use this email to contact you"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  {...register('email')}
                 />
               )}
 
               {/* Conditionally render LinkedIn */}
               {job.profile_configuration.linkedin !== 'off' && (
                 <AppInputForm
-                  name="linkedin"
                   label="Link Linkedin"
-                  type="linkedin"
-                  value={form.linkedin}
-                  onChange={handleChange}
+                  type="url"
+                  placeholder="https://linkedin.com/in/username"
                   {...(job.profile_configuration.linkedin === 'mandatory' && {
                     required: true,
                     starRequired: true,
                   })}
-                  placeholder="https://linkedin.com/in/username"
-                  helperText="Provide your LinkedIn profile URL"
+                  error={!!errors.linkedin}
+                  helperText={errors.linkedin?.message}
+                  {...register('linkedin')}
                 />
               )}
             </Box>
@@ -375,13 +535,11 @@ export default function Application() {
           >
             <AppButton
               label="Submit"
-              loading={loading}
-              disabled={loading}
-              // disabled={disabledSubmit}
+              loading={isSubmitting}
+              disabled={isSubmitting}
               type="submit"
             />
           </Box>
-          {/* </Box> */}
         </form>
       </Box>
       <ModalProfileCam

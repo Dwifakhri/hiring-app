@@ -9,33 +9,38 @@ import AppInputForm from '@/components/AppInputForm';
 import AppAlert from '@/components/AppAlert';
 import logoRa from '@/assets/images/logo-r.svg';
 import { useRouter } from 'next/navigation';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { loginSchema } from '@/utils/schemaForm';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+interface LoginFormInputs {
+  email: string;
+  password: string;
+}
 
 export default function Login() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormInputs>({
+    resolver: yupResolver(loginSchema),
+    mode: 'onTouched',
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setAlert(null);
 
     const res = await signIn('credentials', {
       redirect: false,
-      email: formData.email,
-      password: formData.password,
+      email: data.email,
+      password: data.password,
     });
 
     if (res?.error) {
@@ -44,13 +49,11 @@ export default function Login() {
       setAlert({ type: 'success', message: 'Login successful!' });
       router.push('/jobs');
     }
-
-    setLoading(false);
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-4 w-[500px]"
       noValidate
     >
@@ -58,13 +61,10 @@ export default function Login() {
 
       <Card
         sx={{
-          padding: {
-            xs: '24px',
-            md: '40px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-          },
+          padding: { xs: '24px', md: '40px' },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
         }}
       >
         <Typography fontWeight={700} variant="h6">
@@ -73,37 +73,42 @@ export default function Login() {
 
         {alert && <AppAlert severity={alert.type} message={alert.message} />}
 
+        {/* Email Field */}
         <AppInputForm
           label="Email"
-          name="email"
           type="email"
           placeholder="your@email.com"
-          value={formData.email}
-          onChange={handleChange}
           required
-          helperText="Required"
+          starRequired
+          error={!!errors.email}
+          helperText={errors.email?.message}
+          {...register('email')}
         />
+
+        {/* Password Field */}
         <AppInputForm
           label="Password"
-          name="password"
           type="password"
           placeholder="********"
-          value={formData.password}
-          onChange={handleChange}
           required
-          helperText="Required"
+          starRequired
           inputAdornment="password"
+          error={!!errors.password}
+          helperText={errors.password?.message}
+          {...register('password')}
         />
+
         <Box sx={{ marginLeft: 'auto' }}>
           <Link color="primary" href="#">
             Forgot Password?
           </Link>
         </Box>
+
         <AppButton
           label="Login"
           color="secondary"
-          loading={loading}
-          disabled={loading}
+          loading={isSubmitting}
+          disabled={isSubmitting}
           type="submit"
         />
       </Card>

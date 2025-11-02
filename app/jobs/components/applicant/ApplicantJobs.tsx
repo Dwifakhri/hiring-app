@@ -49,7 +49,7 @@ export default function ApplicantJobs() {
         }
       }, 500);
     }
-  }, [selectedJob?.id, getJobById]);
+  }, [selectedJob?.id, getJobById, selectedJob]);
 
   const handleApplyJob = (jobId: number) => {
     // Navigate to application page
@@ -269,14 +269,6 @@ export default function ApplicantJobs() {
 
                     {/* Job Description Section */}
                     <Box sx={{ mb: 3 }}>
-                      <Typography
-                        variant="h6"
-                        fontWeight="bold"
-                        gutterBottom
-                        sx={{ mb: 2 }}
-                      >
-                        Job Description
-                      </Typography>
                       <Typography
                         variant="body1"
                         color="text.secondary"

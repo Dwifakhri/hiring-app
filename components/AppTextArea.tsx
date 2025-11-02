@@ -74,10 +74,10 @@ export default function AppInputForm({
         />
       </Box>
       {error && (
-        <FormHelperText id="filled-weight-helper-text">
+        <FormHelperText id="filled-weight-helper-text" component="div">
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <AlertTriangle size={16} color={'error'} />
-            <Typography variant="body2" color="text.error">
+            <Typography variant="body2" color="text.error" component="span">
               {helperText}
             </Typography>
           </Box>

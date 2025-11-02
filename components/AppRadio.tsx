@@ -5,7 +5,11 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  FormHelperText,
+  Box,
+  Typography,
 } from '@mui/material';
+import { AlertTriangle } from 'react-feather';
 
 interface RadioOption {
   label: string;
@@ -22,6 +26,8 @@ interface AppRadioGroupProps {
   row?: boolean;
   required?: boolean;
   starRequired?: boolean;
+  error?: boolean;
+  helperText?: string;
 }
 
 export default function AppRadioGroup({
@@ -31,18 +37,23 @@ export default function AppRadioGroup({
   options,
   onChange,
   row = false,
-  required = false,
   starRequired = false,
+  error = false,
+  helperText,
 }: AppRadioGroupProps) {
   return (
-    <FormControl fullWidth required={required}>
+    <FormControl fullWidth>
       {label && (
         <FormLabel
           id={`${name}-label`}
           sx={{
             mb: 1,
+            color: 'rgba(0, 0, 0, 0.6)',
             '&.Mui-focused': {
               color: 'inherit',
+            },
+            '&.Mui-error': {
+              color: 'rgba(0, 0, 0, 0.6)',
             },
           }}
         >
@@ -72,6 +83,16 @@ export default function AppRadioGroup({
           />
         ))}
       </RadioGroup>
+      {error && (
+        <FormHelperText id="filled-weight-helper-text" component="div">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <AlertTriangle size={14} color={'#d32f2f'} />
+            <Typography variant="body2" color="error" component="span">
+              {helperText}
+            </Typography>
+          </Box>
+        </FormHelperText>
+      )}
     </FormControl>
   );
 }

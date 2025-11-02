@@ -33,4 +33,5 @@ export interface Applicant {
   gender: string;
   linkedin: string;
   birth: string;
+  photo_profile: string;
 }

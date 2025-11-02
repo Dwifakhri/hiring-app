@@ -1,11 +1,14 @@
-import * as React from 'react';
 import {
   Autocomplete,
   TextField,
   FormControl,
   FormLabel,
   useTheme,
+  FormHelperText,
+  Box,
+  Typography,
 } from '@mui/material';
+import { AlertTriangle } from 'react-feather';
 
 interface AppAutocompleteProps<T> {
   label?: string;
@@ -19,6 +22,8 @@ interface AppAutocompleteProps<T> {
   starRequired?: boolean;
   fullWidth?: boolean;
   disabled?: boolean;
+  error?: boolean;
+  helperText?: string;
 }
 
 export default function AppAutocomplete<T>({
@@ -33,6 +38,8 @@ export default function AppAutocomplete<T>({
   starRequired = false,
   fullWidth = true,
   disabled = false,
+  error = false,
+  helperText,
 }: AppAutocompleteProps<T>) {
   const theme = useTheme();
 
@@ -70,13 +77,19 @@ export default function AppAutocomplete<T>({
                 borderRadius: '8px',
                 '& fieldset': {
                   borderWidth: '2px',
-                  borderColor: theme.palette.divider,
+                  borderColor: error
+                    ? theme.palette.error.main
+                    : theme.palette.divider,
                 },
                 '&:hover fieldset': {
-                  borderColor: theme.palette.primary.main,
+                  borderColor: error
+                    ? theme.palette.error.main
+                    : theme.palette.primary.main,
                 },
                 '&.Mui-focused fieldset': {
-                  borderColor: theme.palette.primary.main,
+                  borderColor: error
+                    ? theme.palette.error.main
+                    : theme.palette.primary.main,
                 },
               },
               '& .MuiInputBase-input::placeholder': {
@@ -87,6 +100,16 @@ export default function AppAutocomplete<T>({
           />
         )}
       />
+      {error && (
+        <FormHelperText id="filled-weight-helper-text" component="div">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <AlertTriangle size={14} color={'#d32f2f'} />
+            <Typography variant="body2" color="error" component="span">
+              {helperText}
+            </Typography>
+          </Box>
+        </FormHelperText>
+      )}
     </FormControl>
   );
 }
