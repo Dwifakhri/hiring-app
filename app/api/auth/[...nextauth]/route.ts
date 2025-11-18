@@ -2,7 +2,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/prisma/db';
 import bcrypt from 'bcryptjs';
-
+export const runtime = "nodejs";
 const authOptions: NextAuthOptions = {
   debug: true,
 

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: firstError }, { status: 400 });
     }
 
-    const { email, password, full_name, role } = body;
+    const { email, password, full_name } = body;
 
     const existingUser = await db.user.findUnique({
       where: {
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       data: {
         id: uuidv7(),
         full_name,
-        role: role ?? 'candidate',
+        role: 'candidate',
         email,
         password: hashedPassword,
       },
