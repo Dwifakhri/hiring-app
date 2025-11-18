@@ -10,13 +10,8 @@ import AppAlert from '@/components/AppAlert';
 import logoRa from '@/assets/images/logo-r.svg';
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { loginSchema } from '@/utils/schemaForm';
-import { yupResolver } from '@hookform/resolvers/yup';
-
-interface LoginFormInputs {
-  email: string;
-  password: string;
-}
+import { loginSchema, type loginSchemaType } from '@/validations/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export default function Login() {
   const router = useRouter();
@@ -29,12 +24,12 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormInputs>({
-    resolver: yupResolver(loginSchema),
+  } = useForm<loginSchemaType>({
+    resolver: zodResolver(loginSchema),
     mode: 'onTouched',
   });
 
-  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
+  const onSubmit: SubmitHandler<loginSchemaType> = async (data) => {
     setAlert(null);
 
     const res = await signIn('credentials', {
@@ -71,6 +66,13 @@ export default function Login() {
           Login to Rakamin
         </Typography>
 
+        <Typography variant="body2" mt={-1}>
+          Don&apos;t have an account?{' '}
+          <Link color="primary" href="/auth/register">
+            Register
+          </Link>
+        </Typography>
+
         {alert && <AppAlert severity={alert.type} message={alert.message} />}
 
         {/* Email Field */}
@@ -80,6 +82,7 @@ export default function Login() {
           placeholder="your@email.com"
           required
           starRequired
+          autoFocus
           error={!!errors.email}
           helperText={errors.email?.message}
           {...register('email')}

@@ -9,7 +9,7 @@ const protectedRoutes = ['/jobs'];
 // ✅ Role-based route access
 const roleRoutes: Record<string, string[]> = {
   admin: ['/jobs/detail'],
-  applicant: ['/jobs/application'],
+  candidate: ['/jobs/application'],
 };
 
 export async function middleware(req: NextRequest) {

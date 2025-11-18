@@ -109,8 +109,8 @@ export default function JobList({ jobs }: JobListProps) {
                   {job.job_name}
                 </Typography>
                 <Typography variant="subtitle1">
-                  {formatCurrency(job.salary_range.min)} -{' '}
-                  {formatCurrency(job.salary_range.max)}
+                  {formatCurrency(job.salary_min)} -{' '}
+                  {formatCurrency(job.salary_max)}
                 </Typography>
               </Box>
               <AppButton

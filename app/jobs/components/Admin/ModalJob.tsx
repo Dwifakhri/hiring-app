@@ -6,14 +6,14 @@ import AppSelect from '@/components/AppSelect';
 import AppTextArea from '@/components/AppTextArea';
 import FieldRequirementRow, { FieldRequirement } from './FieldRequirementRow';
 import AppButton from '@/components/AppButton';
-import type { Jobs } from '@/types/jobs';
 import { useJobsStore } from '@/store/jobs';
 import { useStatusStore } from '@/store/status';
+import { getErrorResponse } from '@/utils/getErrorResponse';
 
 const jobTypes = [
-  { value: 'full-time', label: 'Full-time' },
+  { value: 'full_time', label: 'Full-time' },
   { value: 'contract', label: 'Contract' },
-  { value: 'part-time', label: 'Part-time' },
+  { value: 'part_time', label: 'Part-time' },
   { value: 'internship', label: 'Internship' },
   { value: 'freelance', label: 'Freelance' },
 ];
@@ -55,10 +55,12 @@ export default function ModalJobs({
   open: boolean;
   onClose: () => void;
 }) {
-  const { createJob } = useJobsStore();
+  const { createJob, isLoadingAction } = useJobsStore();
   const { setStatus } = useStatusStore();
   const [form, setForm] = useState({
     jobName: '',
+    company: '',
+    location: '',
     numberCandidate: '',
     minimumSalary: '',
     maximumSalary: '',
@@ -71,6 +73,8 @@ export default function ModalJobs({
   const disabledSubmit = useMemo(() => {
     const basicEmpty =
       !form.jobName.trim() ||
+      !form.company.trim() ||
+      !form.location.trim() ||
       !form.numberCandidate.trim() ||
       !form.minimumSalary.trim() ||
       !form.maximumSalary.trim() ||
@@ -152,34 +156,47 @@ export default function ModalJobs({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      const jobData = {
+        job_name: form.jobName,
+        job_type: form.jobType,
+        job_description: form.jobDescription,
+        number_candidates: Number(form.numberCandidate),
+        salary_min: Number(form.minimumSalary),
+        salary_max: Number(form.maximumSalary),
+        company: 'Rakamin Academy', // Default value, can be customized
+        location: 'Jakarta, Indonesia', // Default value, can be customized
+        profile_config: {
+          gender: form.jobRequirements.gender,
+          domicile: form.jobRequirements.domicile,
+          phone: form.jobRequirements.phone,
+          linkedin: form.jobRequirements.linkedin,
+          birth: form.jobRequirements.birth,
+        },
+      };
 
-    const { jobs } = useJobsStore.getState();
-    const newId = jobs.length > 0 ? Math.max(...jobs.map((j) => j.id)) + 1 : 1;
+      await createJob(jobData);
 
-    const newJob: Jobs = {
-      id: newId,
-      job_name: form.jobName,
-      job_type: form.jobType,
-      job_description: form.jobDescription,
-      number_candidates: Number(form.numberCandidate),
-      salary_range: {
-        min: Number(form.minimumSalary),
-        max: Number(form.maximumSalary),
-      },
-      profile_configuration: form.jobRequirements,
-      department: 'General', // Default value, can be customized
-      status: 'active', // Default to active
-      company: 'Rakamin Academy', // Default value, can be customized
-      location: 'Jakarta, Indonesia', // Default value, can be customized
-      created_date: new Date().toISOString().split('T')[0],
-      applicants: [],
-    };
-
-    createJob(newJob);
-    onClose();
-    setStatus({ status: 'success', message: 'Job created successfully' });
+      onClose();
+      setStatus({ status: 'success', message: 'Job created successfully' });
+      // Reset form
+      setForm({
+        jobName: '',
+        numberCandidate: '',
+        minimumSalary: '',
+        maximumSalary: '',
+        jobType: '',
+        jobDescription: '',
+        company: '',
+        location: '',
+        jobRequirements: jobRequirementsConfig,
+      });
+    } catch (error) {
+      const message = getErrorResponse(error);
+      setStatus({ status: 'error', message: message });
+    }
   };
 
   return (
@@ -212,6 +229,24 @@ export default function ModalJobs({
                 required
                 starRequired
                 placeholder="Ex. Front End Engineer"
+              />
+              <AppInputForm
+                name="company"
+                label="Company"
+                value={form.company}
+                onChange={handleChange}
+                required
+                starRequired
+                placeholder="Deluxe Digital"
+              />
+              <AppInputForm
+                name="location"
+                label="Location"
+                value={form.location}
+                onChange={handleChange}
+                required
+                starRequired
+                placeholder="Jakarta, Indonesia"
               />
               <AppSelect
                 name="jobType"
@@ -331,7 +366,8 @@ export default function ModalJobs({
               <AppButton
                 label="Publish Job"
                 fullWidth={false}
-                disabled={disabledSubmit}
+                loading={isLoadingAction}
+                disabled={disabledSubmit || isLoadingAction}
                 type="submit"
               />
             </Box>

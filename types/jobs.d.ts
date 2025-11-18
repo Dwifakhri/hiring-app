@@ -1,8 +1,8 @@
 export interface Jobs {
   id: number;
-  department: string;
   status: string;
-  salary_range: { min: number; max: number };
+  salary_min: number;
+  salary_max: number;
   job_name: string;
   job_type: string;
   job_description: string;
@@ -10,7 +10,8 @@ export interface Jobs {
   company: string;
   location: string;
   created_date: string;
-  profile_configuration: {
+  has_applied: boolean;
+  profile_config: {
     full_name: string;
     email: string;
     photo_profile: string;
@@ -27,11 +28,10 @@ export interface Applicant {
   id: number;
   full_name: string;
   email: string;
-  phone: string;
-  country_code: string;
-  domicile: string;
+  photo_profile: string;
   gender: string;
+  domicile: string;
+  phone: string;
   linkedin: string;
   birth: string;
-  photo_profile: string;
 }

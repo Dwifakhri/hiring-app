@@ -1,101 +1,146 @@
 import { create } from 'zustand';
 import { Jobs } from '@/types/jobs';
-import { mockupJobsList } from '@/database/jobs/mockupJobList';
+import { api } from '@/lib/axios';
+import { getErrorResponse } from '@/utils/getErrorResponse';
 
 interface JobsState {
   jobs: Jobs[];
-  initializeJobs: () => void;
-  getJobs: () => Jobs[];
-  getJobById: (id: number) => Jobs | undefined;
-  createJob: (job: Jobs) => void;
-  updateJob: (id: number, job: Partial<Jobs>) => void;
-  deleteJob: (id: number) => void;
+  meta: object | null;
+  isLoading: boolean;
+  isLoadingAction: boolean;
+  jobDetail: Jobs | null;
+  error: string | null;
+  fetchJobs: (params?: {
+    page?: number;
+    limit?: number;
+    sort?: 'asc' | 'desc';
+    search?: string;
+  }) => Promise<void>;
+  fetchJobById: (id: string) => Promise<void>;
+  createJob: (job: CreateJobInput) => Promise<void>;
+  applyForJob: (job: ApplyJob, id: string) => Promise<void>;
+  clearError: () => void;
 }
 
-const STORAGE_KEY = 'hiring-app-jobs';
+interface CreateJobInput {
+  salary_min: number;
+  salary_max: number;
+  job_name: string;
+  job_type: string;
+  job_description: string;
+  number_candidates: number;
+  company: string;
+  location: string;
+  status?: string;
+  profile_config?: {
+    gender?: string;
+    domicile?: string;
+    phone?: string;
+    linkedin?: string;
+    birth?: string;
+  };
+}
 
-// Helper to load jobs from localStorage
-const loadJobsFromStorage = (): Jobs[] => {
-  if (typeof window === 'undefined') return [];
-
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch (error) {
-      console.error('Error parsing jobs from localStorage:', error);
-    }
-  }
-  return [];
-};
-
-// Helper to save jobs to localStorage
-const saveJobsToStorage = (jobs: Jobs[]) => {
-  if (typeof window === 'undefined') return;
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
-  } catch (error) {
-    console.error('Error saving jobs to localStorage:', error);
-  }
-};
-
-// Initialize jobs with mockup data (add empty applications array)
-const initializeMockupJobs = (): Jobs[] => {
-  return mockupJobsList.map((job) => ({
-    ...job,
-  }));
-};
+interface ApplyJob {
+  full_name: string;
+  photo_profile: string;
+  birth: string;
+  gender: string;
+  domicile: string;
+  phone: string;
+  email: string;
+  country_code: string;
+  linkedin: string;
+}
 
 export const useJobsStore = create<JobsState>((set, get) => ({
   jobs: [],
+  meta: null,
+  jobDetail: null,
+  isLoading: true,
+  isLoadingAction: false,
+  error: null,
 
-  // Initialize jobs from localStorage or mockup data
-  initializeJobs: () => {
-    const storedJobs = loadJobsFromStorage();
+  // Fetch all jobs with pagination
+  fetchJobs: async (params = {}) => {
+    set({ isLoading: true, error: null });
+    try {
+      const queryParams = new URLSearchParams({
+        page: String(params.page || 1),
+        limit: String(params.limit || 100),
+        sort: params.sort || 'desc',
+        search: params.search || '',
+      });
 
-    if (storedJobs.length > 0) {
-      set({ jobs: storedJobs });
-    } else {
-      const initialJobs = initializeMockupJobs();
-      set({ jobs: initialJobs });
-      saveJobsToStorage(initialJobs);
+      const response = await api.get(`/jobs?${queryParams}`);
+
+      const result = await response.data;
+
+      set({ jobs: result.data, meta: result.meta, isLoading: false });
+    } catch (error) {
+      getErrorResponse(error);
+    } finally {
+      set({ isLoading: false });
     }
   },
 
-  // Get all jobs
-  getJobs: () => {
-    return get().jobs;
-  },
+  // Fetch single job by ID (async from API)
+  fetchJobById: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.get(`/jobs/${id}`);
 
-  // Get job by ID
-  getJobById: (id: number) => {
-    return get().jobs.find((job) => job.id === id);
+      const result = await response.data;
+
+      set({ jobDetail: result, isLoading: false, error: null });
+    } catch (error) {
+      const message = getErrorResponse(error);
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
   },
 
   // Create new job
-  createJob: (job: Jobs) => {
-    const currentJobs = get().jobs;
-    const newJobs = [...currentJobs, job];
-    set({ jobs: newJobs });
-    saveJobsToStorage(newJobs);
+  createJob: async (job: CreateJobInput) => {
+    set({ isLoadingAction: true, error: null });
+    try {
+      const response = await api.post('/jobs', job);
+
+      const result = await response.data.job;
+
+      // Add new job to the store
+      const currentJobs = get().jobs;
+      set({
+        jobs: [result, ...currentJobs],
+        meta: result.meta,
+      });
+      return result;
+    } catch (error) {
+      const message = getErrorResponse(error);
+      throw new Error(message);
+    } finally {
+      set({ isLoadingAction: false });
+    }
   },
 
-  // Update existing job
-  updateJob: (id: number, updatedJob: Partial<Jobs>) => {
-    const currentJobs = get().jobs;
-    const newJobs = currentJobs.map((job) =>
-      job.id === id ? { ...job, ...updatedJob } : job
-    );
-    set({ jobs: newJobs });
-    saveJobsToStorage(newJobs);
+  // Apply for job
+  applyForJob: async (payload: ApplyJob, id: string) => {
+    set({ isLoadingAction: true, error: null });
+    try {
+      const response = await api.post(`/jobs/${id}/application`, payload);
+
+      return response.data;
+    } catch (error) {
+      const message = getErrorResponse(error);
+      throw new Error(message);
+    } finally {
+      set({ isLoadingAction: false });
+    }
   },
 
-  // Delete job
-  deleteJob: (id: number) => {
-    const currentJobs = get().jobs;
-    const newJobs = currentJobs.filter((job) => job.id !== id);
-    set({ jobs: newJobs });
-    saveJobsToStorage(newJobs);
+  // Clear error
+  clearError: () => {
+    set({ error: null });
   },
 }));

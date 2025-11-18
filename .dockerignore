@@ -14,7 +14,6 @@ dist
 build
 
 # Environment files
-.env*.local
 .env
 
 # Testing

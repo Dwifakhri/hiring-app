@@ -25,31 +25,23 @@ import { formatCurrency } from '@/utils/formatNumber';
 
 export default function ApplicantJobs() {
   const router = useRouter();
-  const [jobList, setJobList] = useState<Jobs[]>([]);
   const [selectedJob, setSelectedJob] = useState<Jobs | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { jobs, getJobById } = useJobsStore();
+  const { jobs, fetchJobs, isLoading } = useJobsStore();
 
   useEffect(() => {
-    setTimeout(() => {
-      // Filter for active jobs only
-      const activeJobs = jobs.filter((job) => job.status === 'active');
-      setJobList(activeJobs);
-      setLoading(false);
-    }, 1000);
-  }, [jobs]);
+    fetchJobs();
+  }, [fetchJobs]);
 
-  // Get full job details when a job is selected
-  useEffect(() => {
-    if (selectedJob) {
-      const fullJobDetail = getJobById(selectedJob.id);
-      setTimeout(() => {
-        if (fullJobDetail) {
-          setSelectedJob(fullJobDetail);
-        }
-      }, 500);
+  const labelJobType = (value: string) => {
+    switch (value) {
+      case 'full_time':
+        return 'Full Time';
+      case 'part_time':
+        return 'Part Time';
+      default:
+        return value;
     }
-  }, [selectedJob?.id, getJobById, selectedJob]);
+  };
 
   const handleApplyJob = (jobId: number) => {
     // Navigate to application page
@@ -57,11 +49,11 @@ export default function ApplicantJobs() {
   };
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} height="100%">
       <>
-        {loading ? (
+        {isLoading ? (
           <AppLoading />
-        ) : jobList.length > 0 ? (
+        ) : jobs.length > 0 ? (
           <>
             <Grid size={{ xs: 12, md: 4 }}>
               <Box
@@ -74,7 +66,7 @@ export default function ApplicantJobs() {
                 }}
               >
                 <List>
-                  {jobList.map((job) => (
+                  {jobs.map((job) => (
                     <ListItemButton
                       key={job.id}
                       onClick={() => setSelectedJob(job)}
@@ -183,8 +175,8 @@ export default function ApplicantJobs() {
                         >
                           <Briefcase size={12} />
                           <Typography variant="body2" color="info.100">
-                            {formatCurrency(job.salary_range.min)} -{' '}
-                            {formatCurrency(job.salary_range.max)}
+                            {formatCurrency(job.salary_min)} -{' '}
+                            {formatCurrency(job.salary_max)}
                           </Typography>
                         </Box>
                       </Box>
@@ -238,7 +230,7 @@ export default function ApplicantJobs() {
                                 p: '2px 8px',
                                 textTransform: 'capitalize',
                               }}
-                              label={selectedJob.job_type}
+                              label={labelJobType(selectedJob.job_type)}
                               color="success"
                               size="small"
                             />
@@ -259,8 +251,9 @@ export default function ApplicantJobs() {
                       </Box>
                       <AppButton
                         fullWidth={false}
-                        label="Apply"
+                        label={selectedJob.has_applied ? 'Applied' : 'Apply'}
                         color="secondary"
+                        disabled={selectedJob.has_applied}
                         onClick={() => handleApplyJob(selectedJob.id)}
                       />
                     </Box>
@@ -302,6 +295,8 @@ export default function ApplicantJobs() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              height: '100%',
+              width: '100%',
               gap: 1.5,
             }}
           >

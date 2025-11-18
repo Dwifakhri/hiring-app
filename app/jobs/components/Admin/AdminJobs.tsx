@@ -7,40 +7,24 @@ import AppInputForm from '@/components/AppInputForm';
 import JobList from './JobList';
 import Image from 'next/image';
 import noJobs from '@/assets/images/no-jobs.svg';
-import type { Jobs } from '@/types/jobs';
 import { useJobsStore } from '@/store/jobs';
 import AppLoading from '@/components/AppLoading';
 
 export default function AdminJob() {
   const [query, setQuery] = useState('');
   const [openModal, setOpenModal] = useState(false);
-  const [jobList, setJobList] = useState<Jobs[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { jobs } = useJobsStore();
+  const [searchLoading, setSearchLoading] = useState(false);
+  const { jobs, isLoading, fetchJobs } = useJobsStore();
 
   useEffect(() => {
-    setTimeout(() => {
-      setJobList(jobs);
-      setLoading(false);
-    }, 1000);
-  }, [jobs]);
+    fetchJobs();
+  }, [fetchJobs]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-
-    setLoading(true);
-    const filteredJobs = jobs.filter((job) => {
-      return (
-        job.job_name.toLowerCase().includes(query.toLowerCase()) ||
-        job.job_type.toLowerCase().includes(query.toLowerCase()) ||
-        job.job_description.toLowerCase().includes(query.toLowerCase())
-      );
-    });
-
-    setTimeout(() => {
-      setJobList(filteredJobs);
-      setLoading(false);
-    }, 1000);
+    setSearchLoading(true);
+    fetchJobs({ search: query });
+    setSearchLoading(false);
   };
 
   return (
@@ -53,7 +37,12 @@ export default function AdminJob() {
       >
         <Grid size={{ xs: 12, md: 'grow' }}>
           <Box
-            sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+            sx={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+            }}
           >
             <form onSubmit={handleSearch}>
               <AppInputForm
@@ -65,16 +54,17 @@ export default function AdminJob() {
               />
             </form>
             <Box sx={{ flex: 1, minHeight: 400, position: 'relative' }}>
-              {loading ? (
+              {isLoading || searchLoading ? (
                 <AppLoading />
-              ) : jobList.length ? (
-                <JobList jobs={jobList} />
+              ) : jobs.length ? (
+                <JobList jobs={jobs} />
               ) : (
                 <Box
                   sx={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
+                    height: '100%',
                     flex: 1,
                   }}
                 >
@@ -97,7 +87,7 @@ export default function AdminJob() {
                     <AppButton
                       type="button"
                       onClick={() => setOpenModal(true)}
-                      label="Create anew job"
+                      label="Create a new job"
                       color="secondary"
                       fullWidth={false}
                     />

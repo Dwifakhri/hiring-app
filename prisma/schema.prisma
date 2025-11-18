@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEXT_DATABASE_URL")
+}
+
+model User {
+  id           String           @id @db.Uuid
+  role         UserRole         @default(candidate)
+  email        String           @unique
+  full_name    String
+  phone        String?
+  birth        DateTime?
+  domicile     String?
+  country      String?
+  country_code String?
+  gender       String?
+  linkedin     String?
+  password     String
+  created_at   DateTime         @default(now())
+  updated_at   DateTime         @updatedAt
+  applications JobApplication[]
+}
+
+enum UserRole {
+  admin
+  candidate
+}
+
+model Job {
+  id                String               @id @db.Uuid
+  status            StatusJob
+  salary_min        Int
+  salary_max        Int
+  job_name          String
+  job_type          TypeJob
+  job_description   String
+  number_candidates Int
+  company           String
+  location          String
+  created_date      DateTime             @default(now())
+  updated_at        DateTime             @updatedAt
+  profile_config_id String               @unique @db.Uuid
+  profile_config    ProfileConfiguration @relation("JobProfileConfig", fields: [profile_config_id], references: [id])
+  applicants        JobApplication[]
+
+  @@unique([job_name, company, location, job_type])
+}
+
+model ProfileConfiguration {
+  id            String            @id @db.Uuid
+  full_name     FieldRequirement  @default(mandatory)
+  email         FieldRequirement  @default(mandatory)
+  photo_profile FieldRequirement  @default(mandatory)
+  gender        FieldRequirement  
+  domicile      FieldRequirement
+  phone         FieldRequirement
+  linkedin      FieldRequirement
+  birth         FieldRequirement
+  created_at    DateTime          @default(now())
+  job           Job?              @relation("JobProfileConfig")
+}
+
+enum FieldRequirement {
+  mandatory
+  optional
+  off
+}
+
+model JobApplication {
+  id         String   @id @db.Uuid
+  user_id    String   @db.Uuid
+  job_id     String   @db.Uuid
+  created_at DateTime @default(now())
+  
+  job        Job      @relation(fields: [job_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+
+  answers    JobApplicationAnswer[]
+}
+
+model JobApplicationAnswer {
+  id              String          @id @db.Uuid
+  application_id  String          @db.Uuid
+  email           String          
+  full_name       String
+  photo_profile   String
+  phone           String?
+  birth           DateTime?
+  domicile        String?
+  country_code    String?
+  gender          String?
+  linkedin        String?
+  applied_at      DateTime        @default(now())
+
+  application    JobApplication  @relation(fields: [application_id], references: [id])
+
+  @@index([application_id])
+}
+
+enum StatusJob {
+  active
+  inactive
+  draft
+}
+
+enum TypeJob {
+  full_time
+  contract
+  part_time
+  internship
+  freelance
+}
+

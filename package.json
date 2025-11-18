@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,9 +19,13 @@
     "@mui/material": "^7.3.4",
     "@mui/x-data-grid": "^8.15.0",
     "@mui/x-date-pickers": "^8.15.0",
+    "@prisma/client": "6.19.0",
     "@tensorflow-models/handpose": "^0.1.0",
     "@tensorflow/tfjs": "^4.22.0",
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
     "dayjs": "^1.11.18",
+    "import": "^0.0.6",
     "lodash": "^4.17.21",
     "next": "16.0.0",
     "next-auth": "^4.24.11",
@@ -26,17 +34,19 @@
     "react-feather": "^2.0.10",
     "react-hook-form": "^7.66.0",
     "react-webcam": "^7.2.0",
-    "yup": "^1.7.1",
+    "uuidv7": "^1.0.2",
+    "zod": "^4.1.12",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "16.0.0"
+    "eslint-config-next": "16.0.0",
+    "prisma": "^6.19.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

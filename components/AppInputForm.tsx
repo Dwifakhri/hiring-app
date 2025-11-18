@@ -66,6 +66,7 @@ const AppInputForm = forwardRef<HTMLInputElement, AppInputFormProps>(
         return (
           <InputAdornment position="end">
             <IconButton
+              type="button"
               aria-label={
                 showPassword ? 'hide the password' : 'display the password'
               }

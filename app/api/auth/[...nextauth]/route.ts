@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { UserService } from '@/database/userService';
+import { db } from '@/prisma/db';
+import bcrypt from 'bcryptjs';
 
 const authOptions: NextAuthOptions = {
   debug: true,
@@ -16,16 +17,28 @@ const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await UserService.getUserByEmailAndPassword(
-          credentials.email,
-          credentials.password
+        const user = await db.user.findUnique({
+          where: { email: credentials.email },
+        });
+
+        const isValidPassword = await bcrypt.compare(
+          credentials.password,
+          user?.password || ''
         );
-        if (!user) {
+
+        if (!user || !isValidPassword) {
           return null;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, created_at, updated_at, ...userWithoutPassword } =
+          user;
+
         // Return user object (will be saved to token)
-        return { ...user, id: user.id };
+        return {
+          ...userWithoutPassword,
+          id: userWithoutPassword.id.toString(),
+        };
       },
     }),
   ],
@@ -43,7 +56,19 @@ const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       // On login, merge user data into token
       if (user) {
-        token.user = user;
+        token.user = user as {
+          id: string;
+          role: string;
+          email: string;
+          full_name: string;
+          phone: string | null;
+          birth: string | null;
+          domicile: string | null;
+          country: string | null;
+          country_code: string | null;
+          gender: string | null;
+          linkedin: string | null;
+        };
       }
       return token;
     },

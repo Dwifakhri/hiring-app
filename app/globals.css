@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './../assets/fonts/nunito_sans.css';
 
 :root {
   --background: #ffffff;

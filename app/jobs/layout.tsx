@@ -2,8 +2,7 @@
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import AppNavBar from '@/components/AppNavBar';
-import { useJobsStore } from '@/store/jobs';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useAuth } from '@/context/auth';
 import { usePathname } from 'next/navigation';
 
@@ -13,16 +12,12 @@ export default function JobsLayout({
   children: React.ReactNode;
 }>) {
   const { user } = useAuth();
+
   const path = usePathname();
-  const initializeJobs = useJobsStore((state) => state.initializeJobs);
 
   const isApplicantForm = useMemo(() => {
     return path.includes('/jobs/application/');
   }, [path]);
-
-  useEffect(() => {
-    initializeJobs();
-  }, [initializeJobs]);
 
   return (
     <>

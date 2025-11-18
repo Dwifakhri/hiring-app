@@ -1,67 +1,43 @@
-import { UserRole } from '@/database/userService';
-import { DefaultUser } from 'next-auth';
-import { DefaultJWT } from 'next-auth/jwt';
-
-interface User extends DefaultUser {
-  id: string;
-  email: string;
-  full_name: string;
-  role: UserRole;
-  phone: string;
-  birth: string;
-  domicile: string;
-  country: string;
-  country_code: string;
-  gender: string;
-  linkedin: string;
-}
+import { DefaultSession } from 'next-auth';
+import { JWT as DefaultJWT } from 'next-auth/jwt';
 
 declare module 'next-auth' {
-  interface User {
-    id: string;
-    email: string;
-    full_name: string;
-    role: UserRole;
-    phone: string;
-    birth: string;
-    domicile: string;
-    country: string;
-    country_code: string;
-    gender: string;
-    linkedin: string;
-  }
-
   interface Session {
     user: {
       id: string;
       email: string;
       full_name: string;
-      role: UserRole;
-      phone: string;
-      birth: string;
-      domicile: string;
-      country: string;
-      country_code: string;
-      gender: string;
-      linkedin: string;
-    };
+      role: string;
+      phone: string | null;
+      birth: string | null;
+      domicile: string | null;
+      country: string | null;
+      country_code: string | null;
+      gender: string | null;
+      linkedin: string | null;
+    } & DefaultSession['user'];
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
-    user?: {
+    email: string;
+    sub: string;
+    user: {
       id: string;
+      role: string;
       email: string;
       full_name: string;
-      role: UserRole;
-      phone: string;
-      birth: string;
-      domicile: string;
-      country: string;
-      country_code: string;
-      gender: string;
-      linkedin: string;
+      phone: string | null;
+      birth: string | null;
+      domicile: string | null;
+      country: string | null;
+      country_code: string | null;
+      gender: string | null;
+      linkedin: string | null;
     };
+    iat: number;
+    exp: number;
+    jti: string;
   }
 }

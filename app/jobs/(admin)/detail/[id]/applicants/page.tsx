@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Box, Paper, Typography, CircularProgress } from '@mui/material';
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useParams } from 'next/navigation';
 import { useJobsStore } from '@/store/jobs';
-import type { Applicant } from '@/types/jobs';
 import noCandidates from '@/assets/images/no-candidates.svg';
 import Image from 'next/image';
 
@@ -25,67 +24,14 @@ const columns: GridColDef[] = [
   { field: 'linkedin', headerName: 'LinkedIn', width: 250 },
 ];
 const paginationModel = { page: 0, pageSize: 5 };
-
 // Format date to "DD Month YYYY"
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
-};
 
 export default function JobDetail() {
   const params = useParams();
-  const [rows, setRows] = useState<GridRowsProp>([]);
-  const [loading, setLoading] = useState(true);
-  const [detail, setDetail] = useState({
-    id: 0,
-    job_name: '',
-    created_date: '',
-  });
-
+  const { jobDetail, isLoading, fetchJobById } = useJobsStore();
   useEffect(() => {
-    if (params.id) {
-      const timeoutId = setTimeout(() => {
-        const jobId = Number(params.id);
-        const jobDetail = useJobsStore.getState().getJobById(jobId);
-
-        if (jobDetail) {
-          setDetail({
-            id: jobDetail?.id || 0,
-            job_name: jobDetail?.job_name || '',
-            created_date: jobDetail?.created_date || '',
-          });
-          const formattedApplicants = jobDetail.applicants.map(
-            (applicant: Applicant) => ({
-              id: applicant.id,
-              full_name: applicant.full_name,
-              email: applicant.email,
-              phone: `${applicant.country_code}${applicant.phone}`,
-              birth: formatDate(applicant.birth),
-              domicile: applicant.domicile,
-              gender: applicant.gender,
-              linkedin: applicant.linkedin,
-            })
-          );
-          setRows(formattedApplicants);
-        }
-        setLoading(false);
-      }, 1000);
-
-      return () => clearTimeout(timeoutId);
+    if (typeof params.id === 'string') {
+      fetchJobById(params.id);
     }
   }, [params.id]);
 
@@ -93,7 +39,7 @@ export default function JobDetail() {
     <Box
       sx={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}
     >
-      {loading ? (
+      {isLoading ? (
         <Box
           sx={{
             display: 'flex',
@@ -107,7 +53,7 @@ export default function JobDetail() {
       ) : (
         <>
           <Typography fontSize="18px" fontWeight={700} mb={2}>
-            {detail?.job_name}
+            {jobDetail?.job_name}
           </Typography>
           <Box
             sx={{
@@ -121,15 +67,14 @@ export default function JobDetail() {
               flexDirection: 'column',
             }}
           >
-            {rows.length > 0 ? (
+            {jobDetail?.applicants?.length ? (
               <Paper sx={{ width: '100%' }}>
                 <DataGrid
-                  rows={rows}
+                  rows={jobDetail?.applicants}
                   columns={columns}
                   initialState={{ pagination: { paginationModel } }}
                   pageSizeOptions={[5, 10]}
                   checkboxSelection
-                  loading={loading}
                   sx={{
                     border: 0,
                     '& .MuiDataGrid-columnHeaders': {
