@@ -35,15 +35,15 @@ const ModalProfileCam = dynamic(
 );
 
 interface ApplyJobFormInputs {
-  full_name: string;
-  photo_profile: string;
-  birth: string;
-  gender: string;
-  domicile: string;
-  phone: string;
-  email: string;
-  country_code: string;
-  linkedin: string;
+  full_name?: string;
+  photo_profile?: string;
+  birth?: string;
+  gender?: string;
+  domicile?: string;
+  phone?: string;
+  email?: string;
+  country_code?: string;
+  linkedin?: string;
 }
 
 export default function Application() {
@@ -171,13 +171,13 @@ export default function Application() {
   const onSubmit: SubmitHandler<ApplyJobFormInputs> = async (data) => {
     try {
       const newApplicant = {
-        full_name: data.full_name.trim(),
-        email: data.email.trim(),
-        phone: data.phone.trim(),
-        country_code: data.country_code,
-        domicile: data.domicile.trim(),
-        gender: data.gender,
-        linkedin: data.linkedin.trim() || '',
+        full_name: data.full_name?.trim() || '',
+        email: data.email?.trim() || '',
+        phone: data.phone?.trim() || '',
+        country_code: data.country_code || '',
+        domicile: data.domicile?.trim() || '',
+        gender: data.gender || '',
+        linkedin: data.linkedin?.trim() || '',
         birth: data.birth || '',
         photo_profile: data.photo_profile || '',
       };
@@ -361,7 +361,7 @@ export default function Application() {
                       <AppRadioGroup
                         label="Pronoun (gender)"
                         name="gender"
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
                         row
                         {...(jobDetail?.profile_config?.gender ===
@@ -420,9 +420,9 @@ export default function Application() {
                         render={({ field: countryCodeField }) => (
                           <AppInputSelect
                             label="Phone Number"
-                            value={phoneField.value}
+                            value={phoneField.value || ''}
                             onChange={phoneField.onChange}
-                            countryCode={countryCodeField.value}
+                            countryCode={countryCodeField.value || '+62'}
                             onCountryCodeChange={countryCodeField.onChange}
                             options={countries}
                             {...(jobDetail?.profile_config?.phone ===
