@@ -9,11 +9,11 @@ export default function SuccessApplyJob() {
   const router = useRouter();
   return (
     <Box
-      height="100svh"
+      height="100%"
       display="flex"
       justifyContent="center"
       alignItems="center"
-      mx="auto"
+      m="auto"
     >
       <Box
         sx={{

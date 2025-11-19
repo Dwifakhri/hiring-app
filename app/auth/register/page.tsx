@@ -35,7 +35,7 @@ export default function Register() {
     setAlert(null);
     try {
       const res = await api.post('/auth/register', data);
-      setAlert({ type: 'error', message: res.data.message });
+      setAlert({ type: 'success', message: res.data.message });
       router.push('/auth/login');
     } catch (error: any) {
       setAlert({ type: 'error', message: getErrorResponse(error) });
