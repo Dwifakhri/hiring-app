@@ -52,7 +52,14 @@ export default function Login() {
       className="flex flex-col gap-4 w-[500px]"
       noValidate
     >
-      <Image src={logoRa} alt="Logo Rakamin" width={150} height={50} priority />
+      <Image
+        src={logoRa}
+        alt="Logo Rakamin"
+        width={150}
+        height={50}
+        priority
+        loading="lazy"
+      />
 
       <Card
         sx={{

@@ -95,7 +95,12 @@ export default function JobDetail() {
                   gap: 1,
                 }}
               >
-                <Image src={noCandidates} alt="No Canndidates" width={285} />
+                <Image
+                  src={noCandidates}
+                  alt="No Canndidates"
+                  width={285}
+                  loading="lazy"
+                />
                 <Typography variant="h6" fontWeight={700} sx={{ mt: 2 }}>
                   No candidates found
                 </Typography>

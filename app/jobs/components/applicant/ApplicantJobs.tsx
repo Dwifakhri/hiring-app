@@ -300,7 +300,7 @@ export default function ApplicantJobs() {
               gap: 1.5,
             }}
           >
-            <Image src={noJobs} alt="No Jobs" width={285} />
+            <Image src={noJobs} alt="No Jobs" width={285} loading="lazy" />
             <Typography variant="h6" fontWeight={700} sx={{ mt: 2 }}>
               No job openings available
             </Typography>

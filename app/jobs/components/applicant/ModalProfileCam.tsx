@@ -254,11 +254,11 @@ export default function ModalProfileCam({
                   </Typography>
 
                   <Stack direction="row" alignItems="center" gap={1}>
-                    <Image src={Hand1} alt="hand1" />
+                    <Image src={Hand1} alt="hand1" loading="lazy" />
                     <ChevronRight />
-                    <Image src={Hand2} alt="hand2" />
+                    <Image src={Hand2} alt="hand2" loading="lazy" />
                     <ChevronRight />
-                    <Image src={Hand3} alt="hand3" />
+                    <Image src={Hand3} alt="hand3" loading="lazy" />
                   </Stack>
                 </Box>
               </div>
@@ -269,7 +269,7 @@ export default function ModalProfileCam({
                 flexDirection="column"
                 gap="16px"
               >
-                <img src={captured} alt="captured" />
+                <img src={captured} alt="captured" loading="lazy" />
                 <Box display="flex" gap="16px" flexDirection="row">
                   <Button
                     onClick={retakePhoto}

@@ -30,7 +30,7 @@ export default function Home() {
             justifyContent: 'space-between',
           }}
         >
-          <Image src={logoRa} alt="Logo" />
+          <Image src={logoRa} alt="Logo" loading="lazy" />
 
           <AppButton
             size="large"
