@@ -53,6 +53,7 @@ export const metadata: Metadata = {
   },
 
   keywords: [
+    'Hiring Management',
     'Hiring App',
     'Job Management',
     'Job Listings',
@@ -60,6 +61,11 @@ export const metadata: Metadata = {
     'Job Search',
     'Career Opportunities',
   ],
+
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
