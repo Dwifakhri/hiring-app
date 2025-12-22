@@ -166,7 +166,7 @@ export default function ModalJobs({
         number_candidates: Number(form.numberCandidate),
         salary_min: Number(form.minimumSalary),
         salary_max: Number(form.maximumSalary),
-        company: 'Rakamin Academy', // Default value, can be customized
+        company: 'Ohirings Academy', // Default value, can be customized
         location: 'Jakarta, Indonesia', // Default value, can be customized
         profile_config: {
           gender: form.jobRequirements.gender,

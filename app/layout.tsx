@@ -9,17 +9,17 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://hiring-app-sooty.vercel.app'),
 
   title: {
-    default: 'Hiring App',
-    template: '%s | Hiring App',
+    default: 'Ohirings',
+    template: '%s | Ohirings',
   },
 
-  description: 'Hiring App – find and manage job opportunities easily.',
-  applicationName: 'Hiring App',
+  description: 'Ohirings – find and manage job opportunities easily.',
+  applicationName: 'Ohirings',
   category: 'Business',
 
   openGraph: {
-    title: 'Hiring App',
-    description: 'Hiring App – find and manage job opportunities easily.',
+    title: 'Ohirings',
+    description: 'Ohirings – find and manage job opportunities easily.',
     type: 'website',
     url: '/',
     images: [
@@ -27,15 +27,15 @@ export const metadata: Metadata = {
         url: '/thumbnailhirings.png',
         width: 800,
         height: 600,
-        alt: 'Hiring App',
+        alt: 'Ohirings',
       },
     ],
   },
 
   twitter: {
     card: 'summary_large_image',
-    title: 'Hiring App',
-    description: 'Hiring App – find and manage job opportunities easily.',
+    title: 'Ohirings',
+    description: 'Ohirings – find and manage job opportunities easily.',
     images: ['/thumbnailhirings.png'],
   },
 
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
 
   keywords: [
     'Hiring Management',
-    'Hiring App',
+    'Ohirings',
     'Job Management',
     'Job Listings',
     'Recruitment',

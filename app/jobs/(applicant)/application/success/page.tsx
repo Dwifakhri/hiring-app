@@ -30,7 +30,7 @@ export default function SuccessApplyJob() {
         </Typography>
         <Typography variant="subtitle1" fontWeight="400" textAlign="center">
           Congratulations! You&apos;ve taken the first step towards a rewarding
-          career at Rakamin.
+          career at Ohirings.
           <br />
           We look forward to learning more about you during the application
           process.

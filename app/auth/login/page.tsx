@@ -7,7 +7,7 @@ import Image from 'next/image';
 import AppButton from '@/components/AppButton';
 import AppInputForm from '@/components/AppInputForm';
 import AppAlert from '@/components/AppAlert';
-import logoRa from '@/assets/images/logo-r.svg';
+import logoHi from '@/assets/images/logo-r.svg';
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { loginSchema, type loginSchemaType } from '@/validations/auth';
@@ -53,12 +53,11 @@ export default function Login() {
       noValidate
     >
       <Image
-        src={logoRa}
-        alt="Logo Rakamin"
+        src={logoHi}
+        alt="Logo Ohirings"
         width={150}
         height={50}
         priority
-        loading="lazy"
       />
 
       <Card
@@ -70,7 +69,7 @@ export default function Login() {
         }}
       >
         <Typography fontWeight={700} variant="h6">
-          Login to Rakamin
+          Login to Ohirings
         </Typography>
 
         <Typography variant="body2" mt={-1}>

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Container, AppBar, Toolbar } from '@mui/material';
 import AppButton from '@/components/AppButton';
-import logoRa from '@/assets/images/logo-r.svg';
+import logoHi from '@/assets/images/logo-r.svg';
 import Image from 'next/image';
 
 export default function Home() {
@@ -30,7 +30,7 @@ export default function Home() {
             justifyContent: 'space-between',
           }}
         >
-          <Image src={logoRa} alt="Logo" loading="lazy" />
+          <Image src={logoHi} alt="Logo" priority width={150} height={50} />
 
           <AppButton
             size="large"

@@ -1,4 +1,4 @@
-# Hiring App - Hiring Management Application (Fullstack)
+# Ohirings - Hiring Management Application (Fullstack)
 
 A modern recruitment platform built with Next.js to streamline the hiring process. Manage candidates, track applications, and make better hiring decisions.
 
