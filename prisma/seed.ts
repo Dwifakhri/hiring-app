@@ -5,7 +5,7 @@ import { uuidv7 } from 'uuidv7';
 const prisma = new PrismaClient();
 
 async function main() {
-  const password = await bcrypt.hash('123123', 10);
+  const password = await bcrypt.hash('Password123!', 10);
 
   // Admin user
   await prisma.user.upsert({

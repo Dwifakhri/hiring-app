@@ -4,6 +4,7 @@ import { ThemeProvider } from '@mui/material';
 import theme from '../utils/theme';
 import { AuthProvider } from '@/context/auth';
 import AppSnackbar from '@/components/AppSnackBar';
+import { APP_VERSION } from '@/config';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hiring-app-sooty.vercel.app'),
@@ -11,6 +12,10 @@ export const metadata: Metadata = {
   title: {
     default: 'Ohirings',
     template: '%s | Ohirings',
+  },
+
+  other: {
+    version: APP_VERSION,
   },
 
   description: 'Ohirings – find and manage job opportunities easily.',
